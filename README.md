@@ -31,12 +31,47 @@ AUTONOMIC Framework Simulation Hackathon/
 
 ## Required Libraries and Dependencies
 
-### Core Dependencies
+### ⚠️ Important: YAFS Installation Issue
+
+**YAFS is NOT available on PyPI** and must be installed from GitHub. Additionally, YAFS requires Python 2.7, but this project uses Python 3.x libraries. Here are the solutions:
+
+### Solution 1: Install YAFS from GitHub (Recommended)
 
 ```bash
-# YAFS - Yet Another Fog Simulator
-pip install yafs
+# Clone YAFS repository
+git clone https://github.com/acsicuib/YAFS.git
+cd YAFS
 
+# Install YAFS
+pip install .
+```
+
+### Solution 2: Use Python 2.7 Environment (Alternative)
+
+If you encounter Python version conflicts, you can create a Python 2.7 environment:
+
+```bash
+# Install virtualenv for Python 2.7
+pip install virtualenv
+
+# Create Python 2.7 environment
+virtualenv -p python2.7 yafs_env
+
+# Activate environment
+# Windows:
+yafs_env\Scripts\activate
+# Linux/Mac:
+source yafs_env/bin/activate
+
+# Install YAFS
+git clone https://github.com/acsicuib/YAFS.git
+cd YAFS
+pip install .
+```
+
+### Core Dependencies (Python 3.x)
+
+```bash
 # Deep Reinforcement Learning
 pip install stable-baselines3[extra]
 pip install torch
@@ -50,10 +85,18 @@ pip install simpy
 pip install gym
 ```
 
-### Complete Installation Command
+### Complete Installation Commands
 
+**For Python 3.x (after installing YAFS from GitHub):**
 ```bash
-pip install yafs stable-baselines3[extra] torch numpy pandas simpy gym
+pip install stable-baselines3[extra] torch numpy pandas simpy gym
+```
+
+**For Python 2.7 environment:**
+```bash
+# Note: Some packages may not be available for Python 2.7
+pip install numpy pandas simpy
+# For DRL: You may need to use older versions or alternative libraries
 ```
 
 ### Optional Dependencies (for advanced features)
@@ -90,9 +133,18 @@ pip install jupyter notebook
 
 ### Step 2: Install Dependencies
 
+**First, install YAFS from GitHub:**
+```bash
+git clone https://github.com/acsicuib/YAFS.git
+cd YAFS
+pip install .
+cd ..  # Return to your project directory
+```
+
+**Then install other dependencies:**
 ```bash
 pip install --upgrade pip
-pip install yafs stable-baselines3[extra] torch numpy pandas simpy gym
+pip install stable-baselines3[extra] torch numpy pandas simpy gym
 ```
 
 ### Step 3: Verify Installation
@@ -214,13 +266,26 @@ The `autonomic_simulation_results.csv` contains:
 
 ### Common Issues
 
-1. **Import Errors**:
+1. **YAFS Installation Errors**:
    ```bash
-   # If YAFS import fails
-   pip install --upgrade yafs
+   # YAFS is not available on PyPI - must install from GitHub
+   git clone https://github.com/acsicuib/YAFS.git
+   cd YAFS
+   pip install .
    
+   # If you get Python version errors, try Python 2.7:
+   virtualenv -p python2.7 yafs_env
+   source yafs_env/bin/activate  # Linux/Mac
+   # or yafs_env\Scripts\activate  # Windows
+   ```
+
+2. **Python Version Conflicts**:
+   ```bash
    # If stable-baselines3 import fails
    pip install --upgrade stable-baselines3
+   
+   # If you need Python 2.7 compatibility, use older versions:
+   pip install numpy==1.16.6 pandas==0.24.2
    ```
 
 2. **Model Loading Errors**:
