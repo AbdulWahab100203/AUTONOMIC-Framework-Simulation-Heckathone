@@ -1,0 +1,21 @@
+Show the Basic Simulation: Run this code for your supervisor. Explain the components:
+
+simulation_main.py: Sets up the world.
+
+autonomic_drl_selector.py: Makes the decisions (the "brain").
+
+simple_monitor.py: Observes the system (the "eyes").
+
+The CSV output is the "experimental results".
+
+Implement a Baseline: Duplicate simulation_main.py to simulation_baseline.py. In the copy, change the selector to a built-in YAFS one, like selectRandom or FirstFit. Run both simulations and compare the results in the CSV file. This demonstrates the value of your heuristic vs. a simple one.
+
+Gradually Increase Complexity: This package gives you a working foundation. The next steps we can work on are:
+
+Replace the Heuristic with a Real DRL Agent: Connect the AutonomicDRLSelector to a trained SAC model from Stable Baselines3.
+
+Improve the Monitoring: Make the monitor collect real resource utilization (CPU, memory) instead of just queue length.
+
+Implement Fault Injection: Add code to randomly kill a node during the simulation and watch the system react (you'd need to extend the selector for this self-healing feature).
+
+This package provides a completely functional starting point that you can confidently demonstrate and then expand upon for your full PhD experiments.

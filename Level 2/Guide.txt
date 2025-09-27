@@ -1,0 +1,29 @@
+Run this train_sac_agent to train the model:
+
+bash
+python train_sac_agent.py
+
+This will generate a sac_fog_offload.zip file in your project directory.
+
+
+----
+
+
+
+
+Key Integration Points & Next Steps: 
+State Construction is Key: The current select_node method uses random state values. The most important next task is to replace fog1_cpu = np.random.rand() with code that queries the actual state from the SimpleMonitor or directly from the YAFS simulator. This links the real simulation state to the AI's decision.
+
+Example: fog1_cpu = sim.get_total_cpu_used(10) / sim.topology.get_node(10)['CPU']
+
+Action-Node Mapping: The node_id_map dictionary is crucial. It defines what action (0, 1, 2) corresponds to which real node ID (10, 11, 20). This must be consistent between the training environment and the selector.
+
+Run the Simulation: Now, when we run python simulation_main.py, it will load the trained SAC model and use it for every offloading decision. The fallback heuristic will only be used if the model fails to load.
+
+Compare and Contrast: Now we can do a true comparison!
+
+Run the simulation with the original heuristic selector.
+
+Run it with the new DRL selector.
+
+Compare the autonomic_simulation_results.csv files from both runs. The DRL version should show better average performance (lower latency, lower energy) because it was trained to optimize for that specific reward function.

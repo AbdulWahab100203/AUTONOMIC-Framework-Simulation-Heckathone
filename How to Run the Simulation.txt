@@ -1,0 +1,11 @@
+Save the Code: Save all three code files (simulation_main.py, autonomic_drl_selector.py, simple_monitor.py) in the same directory.
+
+Run the Simulation: Execute the main file from your terminal (ensure your virtual environment is activated).
+
+
+cd path/to/your/project/directory
+python simulation_main.py
+
+Analyze the Output: The simulation will run and print a monitor report every 100 time units. After finishing, it will create a CSV file autonomic_simulation_results.csv containing detailed data about every task in the simulation (creation time, start time, end time, source, destination, etc.). 
+
+We can open this file in Excel or use Python (Pandas, Matplotlib) to analyze it and calculate metrics like average completion time.

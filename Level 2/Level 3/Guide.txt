@@ -1,0 +1,94 @@
+File 2: Modified simulation_main.py
+We need to import the new monitor and deploy it correctly.
+
+Changes near the top:
+
+python
+# ... other imports ...
+from resource_monitor import ResourceMonitor  # Replace SimpleMonitor
+Changes in the main() function:
+
+python
+    # ... rest of the code before s.run() ...
+
+    # --- Deploy our Enhanced Resource Monitor to collect REAL resource stats ---
+    monitor = ResourceMonitor()
+    monitor.deploy_monitor(s, interval=100) # Check resources every 100 time units
+
+    # Run the simulation
+    s.run(until=1000) # Run for 1000 simulated time units
+    print("\nSimulation finished.")
+
+    # ... rest of the code (exporting results) ...
+File 3: Enhanced autonomic_drl_selector.py
+This is the most important change. The DRL agent now uses real data from the monitor.
+
+Crucial modifications to the select_node method:
+
+python
+    def select_node(self, sim, candidate_nodes):
+        """
+        The core method. Constructs the state observation from REAL monitor data
+        and queries the DRL model.
+        """
+        if self.model is None:
+            return self._heuristic_fallback(sim, candidate_nodes)
+
+        # 1. GET THE REAL STATE FROM THE MONITOR
+        # This assumes the monitor is available as an attribute of the simulator.
+        # We need to find the monitor instance. This is a bit of a hack but works.
+        monitor_instance = None
+        for process in sim.processes:
+            if hasattr(process, 'is_monitor') and process.is_monitor: 
+                # You might need to set an attribute on the monitor to identify it
+                monitor_instance = process
+                break
+        # A more robust way: Store a reference to the monitor in the sim object when deploying it.
+        # For this example, we'll assume we can find it. In a full implementation, 
+        # you would pass the monitor reference to the selector.
+
+        # If we can't find the monitor, fall back
+        if monitor_instance is None:
+            print("WARNING: Monitor not found. Falling back to heuristic.")
+            return self._heuristic_fallback(sim, candidate_nodes)
+
+        # Query the monitor for the state of our two fog nodes
+        # State: [CPU_Load_Fog1, RAM_Fog1, CPU_Load_Fog2, RAM_Fog2, Task_Size_Normalized]
+        fog1_cpu, fog1_ram = monitor_instance.get_node_utilization(10) # Node ID 10
+        fog2_cpu, fog2_ram = monitor_instance.get_node_utilization(11) # Node ID 11
+
+        # Get the current task size from the message and normalize it
+        task_size = sim.msg[message]['bytes'] / 2000.0 
+        task_size = min(task_size, 1.0)
+
+        # Construct the state vector for the DRL agent
+        state = np.array([fog1_cpu, fog1_ram, fog2_cpu, fog2_ram, task_size], dtype=np.float32)
+
+        # 2. GET AN ACTION FROM THE DRL AGENT
+        action, _states = self.model.predict(state, deterministic=True)
+        print(f"DRL State: {state} -> Action: {action}")
+        return int(action)
+A more robust way to handle the monitor reference (Recommended):
+
+In simulation_main.py, after creating the monitor:
+
+python
+monitor = ResourceMonitor()
+monitor.deploy_monitor(s, interval=100)
+# Store a reference to the monitor in the simulator object for easy access
+s.monitor = monitor
+In autonomic_drl_selector.py, in the select_node method:
+
+python
+# 1. GET THE REAL STATE FROM THE MONITOR
+if hasattr(sim, 'monitor'):
+    monitor_instance = sim.monitor
+else:
+    print("WARNING: Monitor not attached to sim. Falling back to heuristic.")
+    return self._heuristic_fallback(sim, candidate_nodes)
+Summary of the Improvement:
+Real Metrics: The ResourceMonitor now actively calculates CPU% and RAM% for each node based on the sum of instructions and memory of all active tasks on that node.
+
+Informed Decisions: The DRL agent's state vector is now populated with these real, dynamic utilization metrics (fog1_cpu, fog1_ram, etc.) instead of random numbers.
+
+Realistic Evaluation: This allows the DRL agent to learn a policy that genuinely reacts to system load. For example, it can learn to avoid a node that is at 95% CPU utilization, even if its queue is short.
